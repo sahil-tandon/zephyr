@@ -1,6 +1,6 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import Wordle from "./Wordle";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Wordle from "./components/Wordle";
 
 function App() {
   return (
@@ -14,7 +14,9 @@ function App() {
           </ul>
         </nav>
 
-        <Route path="/wordle" component={Wordle} />
+        <Routes>
+          <Route path="/wordle" element={<Wordle />} />
+        </Routes>
       </div>
     </Router>
   );
