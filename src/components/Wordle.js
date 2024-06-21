@@ -27,6 +27,9 @@ function Wordle() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (gameOver) {
+      return;
+    }
     const guess = event.target.elements.guess.value;
     setGuess(guess);
     const feedback = guess.split("").map((g, i) => {
