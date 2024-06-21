@@ -19,39 +19,41 @@ function Wordle() {
   const [guess, setGuess] = useState("");
   const [guesses, setGuesses] = useState([]);
   const [gameOver, setGameOver] = useState(false);
+  const [guessCount, setGuessCount] = useState(0);
 
   useEffect(() => {
     setWord(words[Math.floor(Math.random() * words.length)]);
   }, []);
 
-  const handleChange = (event) => {
-    setGuess(event.target.value);
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
+    const guess = event.target.elements.guess.value;
+    setGuess(guess);
     const feedback = guess.split("").map((g, i) => {
       if (g === word[i]) return "green";
       if (word.includes(g)) return "yellow";
       return "gray";
     });
     setGuesses([...guesses, { guess, feedback }]);
-    setGuess("");
     if (guess === word) {
       setGameOver(true);
+    } else {
+      setGuessCount((prevCount) => {
+        const newCount = prevCount + 1;
+        if (newCount === 6) {
+          setGameOver(true);
+        }
+        return newCount;
+      });
     }
+    event.target.elements.guess.value = "";
   };
 
   return (
     <div>
       <h1>Wordle</h1>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={guess}
-          onChange={handleChange}
-          maxLength="5"
-        />
+        <input type="text" name="guess" maxLength="5" />
         <button type="submit">Guess</button>
       </form>
       {guesses.map((guess, index) => (
@@ -63,7 +65,7 @@ function Wordle() {
           ))}
         </p>
       ))}
-      {gameOver && <p>You won!</p>}
+      {gameOver && <p>You {guess === word ? "won" : "lost"}!</p>}
     </div>
   );
 }
