@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./Wordle.css";
 
 const words = [
@@ -18,19 +18,13 @@ function Wordle() {
     words[Math.floor(Math.random() * words.length)]
   );
   const [guesses, setGuesses] = useState(
-    Array(6).fill({ guess: "", feedback: Array(5).fill("gray") })
+    Array.from({ length: 6 }, () => ({
+      guess: Array(5).fill(""),
+      feedback: Array(5).fill("gray"),
+    }))
   );
   const [gameOver, setGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
-  const inputRefs = useRef(
-    Array(6)
-      .fill(0)
-      .map((_, i) =>
-        Array(5)
-          .fill(0)
-          .map((_, j) => React.createRef())
-      )
-  );
 
   useEffect(() => {
     setWord(words[Math.floor(Math.random() * words.length)]);
@@ -42,16 +36,16 @@ function Wordle() {
       return;
     }
 
-    const guess = inputRefs.current[guessCount]
-      .map((ref) => ref.current.value)
-      .join("");
+    const guess = guesses[guessCount].guess.join("");
     const feedback = guess.split("").map((g, i) => {
       if (g === word[i]) return "green";
       if (word.includes(g)) return "yellow";
       return "gray";
     });
     setGuesses(
-      guesses.map((g, i) => (i === guessCount ? { guess, feedback } : g))
+      guesses.map((g, i) =>
+        i === guessCount ? { guess: guess.split(""), feedback } : g
+      )
     );
     if (guess === word) {
       setGameOver(true);
@@ -79,18 +73,16 @@ function Wordle() {
                   <input
                     key={j}
                     type="text"
-                    ref={inputRefs.current[index][j]}
                     maxLength="1"
                     disabled={index !== guessCount || gameOver}
                     className={`guess-cell guess-cell-${guess.feedback[j]}`}
                     value={guess.guess[j] || ""}
                     onChange={(e) => {
-                      const newGuesses = [...guesses];
-                      newGuesses[index].guess =
-                        newGuesses[index].guess.substr(0, j) +
-                        e.target.value +
-                        newGuesses[index].guess.substr(j + 1);
-                      setGuesses(newGuesses);
+                      if (index === guessCount) {
+                        const newGuesses = [...guesses];
+                        newGuesses[index].guess[j] = e.target.value;
+                        setGuesses(newGuesses);
+                      }
                     }}
                   />
                 ))}
@@ -101,7 +93,9 @@ function Wordle() {
       </form>
       {gameOver && (
         <p>
-          You {guesses[guesses.length - 1].guess === word ? "won" : "lost"}!
+          You{" "}
+          {guesses[guesses.length - 1].guess.join("") === word ? "won" : "lost"}
+          !
         </p>
       )}
     </div>
