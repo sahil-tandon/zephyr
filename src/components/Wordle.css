@@ -1,7 +1,7 @@
 .guess-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .guess-row {
@@ -9,10 +9,16 @@
 }
 
 .guess-cell {
-    width: 20px;
-    height: 20px;
-    border: 1px solid black;
+    width: 40px;
+    height: 40px;
+    margin: 5px;
     text-align: center;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.guess-cell-gray {
+    background-color: gray;
 }
 
 .guess-cell-green {
@@ -21,8 +27,4 @@
 
 .guess-cell-yellow {
     background-color: yellow;
-}
-
-.guess-cell-gray {
-    background-color: gray;
 }
