@@ -25,6 +25,7 @@ function Wordle() {
   );
   const [gameOver, setGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
+  const [lastGuess, setLastGuess] = useState("");
 
   const inputRefs = Array(6)
     .fill(0)
@@ -45,6 +46,7 @@ function Wordle() {
     }
 
     const guess = guesses[guessCount].guess.join("");
+    setLastGuess(guess);
     const feedback = guess.split("").map((g, i) => {
       if (g === word[i]) return "green";
       if (word.includes(g)) return "yellow";
@@ -62,6 +64,8 @@ function Wordle() {
         const newCount = prevCount + 1;
         if (newCount === 6) {
           setGameOver(true);
+        } else if (newCount < 6) {
+          inputRefs[newCount][0].current.focus();
         }
         return newCount;
       });
@@ -103,13 +107,7 @@ function Wordle() {
         </div>
         <button type="submit">Guess</button>
       </form>
-      {gameOver && (
-        <p>
-          You{" "}
-          {guesses[guesses.length - 1].guess.join("") === word ? "won" : "lost"}
-          !
-        </p>
-      )}
+      {gameOver && <p>You {lastGuess === word ? "won" : "lost"}!</p>}
     </div>
   );
 }
