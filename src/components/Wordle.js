@@ -39,6 +39,12 @@ function Wordle() {
     setWord(words[Math.floor(Math.random() * words.length)]);
   }, []);
 
+  useEffect(() => {
+    if (guessCount < 6) {
+      inputRefs[guessCount][0].current.focus();
+    }
+  }, [guessCount]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (gameOver) {
