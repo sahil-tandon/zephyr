@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createRef } from "react";
 import "./Wordle.css";
 
 const words = [
@@ -25,6 +25,14 @@ function Wordle() {
   );
   const [gameOver, setGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
+
+  const inputRefs = Array(6)
+    .fill(0)
+    .map(() =>
+      Array(5)
+        .fill(0)
+        .map(() => createRef())
+    );
 
   useEffect(() => {
     setWord(words[Math.floor(Math.random() * words.length)]);
@@ -77,11 +85,15 @@ function Wordle() {
                     disabled={index !== guessCount || gameOver}
                     className={`guess-cell guess-cell-${guess.feedback[j]}`}
                     value={guess.guess[j] || ""}
+                    ref={inputRefs[index][j]}
                     onChange={(e) => {
                       if (index === guessCount) {
                         const newGuesses = [...guesses];
                         newGuesses[index].guess[j] = e.target.value;
                         setGuesses(newGuesses);
+                        if (j < 4) {
+                          inputRefs[index][j + 1].current.focus();
+                        }
                       }
                     }}
                   />
