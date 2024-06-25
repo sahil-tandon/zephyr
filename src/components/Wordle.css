@@ -1,0 +1,28 @@
+.guess-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.guess-row {
+    display: flex;
+}
+
+.guess-cell {
+    width: 20px;
+    height: 20px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.guess-cell-green {
+    background-color: green;
+}
+
+.guess-cell-yellow {
+    background-color: yellow;
+}
+
+.guess-cell-gray {
+    background-color: gray;
+}
