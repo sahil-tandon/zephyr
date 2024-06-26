@@ -107,14 +107,6 @@ function Wordle() {
                         }
                       }
                     }}
-                    onBlur={() => {
-                      if (index === guessCount && !gameOver) {
-                        setTimeout(
-                          () => inputRefs[index][j].current.focus(),
-                          0
-                        );
-                      }
-                    }}
                     onKeyDown={(e) => {
                       if (
                         e.key === "Backspace" &&
