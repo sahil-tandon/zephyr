@@ -70,8 +70,6 @@ function Wordle() {
         const newCount = prevCount + 1;
         if (newCount === 6) {
           setGameOver(true);
-        } else if (newCount < 6) {
-          inputRefs[newCount][0].current.focus();
         }
         return newCount;
       });
@@ -104,6 +102,26 @@ function Wordle() {
                         if (j < 4) {
                           inputRefs[index][j + 1].current.focus();
                         }
+                      }
+                    }}
+                    onBlur={() => {
+                      if (index === guessCount && !gameOver) {
+                        setTimeout(
+                          () => inputRefs[index][j].current.focus(),
+                          0
+                        );
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Backspace" &&
+                        e.target.value === "" &&
+                        j > 0
+                      ) {
+                        const newGuesses = [...guesses];
+                        newGuesses[index].guess[j - 1] = "";
+                        setGuesses(newGuesses);
+                        inputRefs[index][j - 1].current.focus();
                       }
                     }}
                   />
