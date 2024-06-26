@@ -52,6 +52,9 @@ function Wordle() {
     }
 
     const guess = guesses[guessCount].guess.join("");
+    if (guess.length < 5) {
+      return;
+    }
     setLastGuess(guess);
     const feedback = guess.split("").map((g, i) => {
       if (g === word[i]) return "green";
