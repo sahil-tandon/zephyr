@@ -52,6 +52,9 @@ function Wordle() {
     }
 
     const guess = guesses[guessCount].guess.join("");
+    if (guess.length < 5) {
+      return;
+    }
     setLastGuess(guess);
     const feedback = guess.split("").map((g, i) => {
       if (g === word[i]) return "green";
@@ -102,14 +105,6 @@ function Wordle() {
                         if (j < 4) {
                           inputRefs[index][j + 1].current.focus();
                         }
-                      }
-                    }}
-                    onBlur={() => {
-                      if (index === guessCount && !gameOver) {
-                        setTimeout(
-                          () => inputRefs[index][j].current.focus(),
-                          0
-                        );
                       }
                     }}
                     onKeyDown={(e) => {
