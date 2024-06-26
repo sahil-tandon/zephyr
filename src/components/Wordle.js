@@ -25,6 +25,7 @@ function Wordle() {
   );
   const [gameOver, setGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
+  const [lastGuess, setLastGuess] = useState("");
 
   const inputRefs = Array(6)
     .fill(0)
@@ -38,6 +39,12 @@ function Wordle() {
     setWord(words[Math.floor(Math.random() * words.length)]);
   }, []);
 
+  useEffect(() => {
+    if (guessCount < 6) {
+      inputRefs[guessCount][0].current.focus();
+    }
+  }, [guessCount]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (gameOver) {
@@ -45,6 +52,7 @@ function Wordle() {
     }
 
     const guess = guesses[guessCount].guess.join("");
+    setLastGuess(guess);
     const feedback = guess.split("").map((g, i) => {
       if (g === word[i]) return "green";
       if (word.includes(g)) return "yellow";
@@ -96,6 +104,26 @@ function Wordle() {
                         }
                       }
                     }}
+                    onBlur={() => {
+                      if (index === guessCount && !gameOver) {
+                        setTimeout(
+                          () => inputRefs[index][j].current.focus(),
+                          0
+                        );
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Backspace" &&
+                        e.target.value === "" &&
+                        j > 0
+                      ) {
+                        const newGuesses = [...guesses];
+                        newGuesses[index].guess[j - 1] = "";
+                        setGuesses(newGuesses);
+                        inputRefs[index][j - 1].current.focus();
+                      }
+                    }}
                   />
                 ))}
             </div>
@@ -103,13 +131,7 @@ function Wordle() {
         </div>
         <button type="submit">Guess</button>
       </form>
-      {gameOver && (
-        <p>
-          You{" "}
-          {guesses[guesses.length - 1].guess.join("") === word ? "won" : "lost"}
-          !
-        </p>
-      )}
+      {gameOver && <p>You {lastGuess === word ? "won" : "lost"}!</p>}
     </div>
   );
 }
