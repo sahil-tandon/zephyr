@@ -11,12 +11,16 @@ const words = [
   "charm",
   "spark",
   "peace",
+].map((word) => word.toUpperCase());
+
+const keyboardRows = [
+  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+  ["Enter", "Z", "X", "C", "V", "B", "N", "M", "Backspace"],
 ];
 
 function Wordle() {
-  const [word, setWord] = useState(
-    words[Math.floor(Math.random() * words.length)]
-  );
+  const [word, setWord] = useState("");
   const [guesses, setGuesses] = useState(
     Array.from({ length: 6 }, () => ({
       guess: Array(5).fill(""),
@@ -25,15 +29,8 @@ function Wordle() {
   );
   const [gameOver, setGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
-  const [lastGuess, setLastGuess] = useState("");
 
-  const inputRefs = Array(6)
-    .fill(0)
-    .map(() =>
-      Array(5)
-        .fill(0)
-        .map(() => createRef())
-    );
+  const inputRefs = guesses.map((row) => row.guess.map(() => createRef()));
 
   useEffect(() => {
     setWord(words[Math.floor(Math.random() * words.length)]);
@@ -45,6 +42,36 @@ function Wordle() {
     }
   }, [guessCount]);
 
+  const handleKeyPress = (key) => {
+    if (gameOver) return;
+    if (key === "Backspace") {
+      const newGuesses = [...guesses];
+      const currentGuess = newGuesses[guessCount].guess;
+      const indexToClear =
+        currentGuess.lastIndexOf(
+          currentGuess.find((char) => char !== "") || ""
+        ) || 0;
+      newGuesses[guessCount].guess[indexToClear] = "";
+      setGuesses(newGuesses);
+      if (indexToClear > 0) {
+        inputRefs[guessCount][indexToClear - 1].current.focus();
+      }
+    } else if (key === "Enter") {
+      handleSubmit(new Event("submit"));
+    } else {
+      const newGuesses = [...guesses];
+      const currentGuess = newGuesses[guessCount].guess;
+      const firstEmptyIndex = currentGuess.indexOf("");
+      if (firstEmptyIndex !== -1) {
+        newGuesses[guessCount].guess[firstEmptyIndex] = key;
+        setGuesses(newGuesses);
+        if (firstEmptyIndex < 4) {
+          inputRefs[guessCount][firstEmptyIndex + 1].current.focus();
+        }
+      }
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (gameOver) {
@@ -55,7 +82,6 @@ function Wordle() {
     if (guess.length < 5) {
       return;
     }
-    setLastGuess(guess);
     const feedback = guess.split("").map((g, i) => {
       if (g === word[i]) return "green";
       if (word.includes(g)) return "yellow";
@@ -86,47 +112,68 @@ function Wordle() {
         <div className="guess-grid">
           {guesses.map((guess, index) => (
             <div key={index} className="guess-row">
-              {Array(5)
-                .fill(0)
-                .map((_, j) => (
-                  <input
-                    key={j}
-                    type="text"
-                    maxLength="1"
-                    disabled={index !== guessCount || gameOver}
-                    className={`guess-cell guess-cell-${guess.feedback[j]}`}
-                    value={guess.guess[j] || ""}
-                    ref={inputRefs[index][j]}
-                    onChange={(e) => {
-                      if (index === guessCount) {
-                        const newGuesses = [...guesses];
-                        newGuesses[index].guess[j] = e.target.value;
-                        setGuesses(newGuesses);
-                        if (j < 4) {
-                          inputRefs[index][j + 1].current.focus();
-                        }
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (
-                        e.key === "Backspace" &&
-                        e.target.value === "" &&
-                        j > 0
-                      ) {
-                        const newGuesses = [...guesses];
-                        newGuesses[index].guess[j - 1] = "";
-                        setGuesses(newGuesses);
-                        inputRefs[index][j - 1].current.focus();
-                      }
-                    }}
-                  />
-                ))}
+              {guess.guess.map((letter, j) => (
+                <input
+                  key={j}
+                  type="text"
+                  maxLength="1"
+                  disabled={index !== guessCount || gameOver}
+                  className={`guess-cell guess-cell-${guess.feedback[j]}`}
+                  value={letter}
+                  ref={inputRefs[index][j]}
+                  onChange={(e) => {
+                    const newGuesses = [...guesses];
+                    newGuesses[index].guess[j] = e.target.value.toUpperCase();
+                    setGuesses(newGuesses);
+                    if (j < 4) {
+                      inputRefs[index][j + 1].current.focus();
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === "Backspace" &&
+                      e.target.value === "" &&
+                      j > 0
+                    ) {
+                      inputRefs[index][j - 1].current.focus();
+                    }
+                  }}
+                />
+              ))}
             </div>
           ))}
         </div>
-        <button type="submit">Guess</button>
       </form>
-      {gameOver && <p>You {lastGuess === word ? "won" : "lost"}!</p>}
+      {gameOver && (
+        <p
+          className={`game-over-message ${
+            guessCount === 6 && guesses[guessCount - 1].guess.join("") !== word
+              ? "game-over-lost"
+              : "game-over-won"
+          }`}
+        >
+          The word was {word}. You{" "}
+          {guessCount === 6 && guesses[guessCount - 1].guess.join("") !== word
+            ? "lost"
+            : "won"}
+          !
+        </p>
+      )}
+      <div className="virtual-keyboard">
+        {keyboardRows.map((row, rowIndex) => (
+          <div key={rowIndex} className="keyboard-row">
+            {row.map((key) => (
+              <button
+                key={key}
+                onClick={() => handleKeyPress(key)}
+                className="keyboard-key"
+              >
+                {key}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
