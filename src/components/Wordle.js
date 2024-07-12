@@ -143,6 +143,9 @@ function Wordle() {
             </div>
           ))}
         </div>
+        <button type="submit" hidden="true">
+          Guess
+        </button>
       </form>
       {gameOver && (
         <p
