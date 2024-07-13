@@ -29,6 +29,7 @@ function Wordle() {
   );
   const [gameOver, setGameOver] = useState(false);
   const [guessCount, setGuessCount] = useState(0);
+  const [keyStatus, setKeyStatus] = useState({});
 
   const inputRefs = guesses.map((row) => row.guess.map(() => createRef()));
 
@@ -97,6 +98,21 @@ function Wordle() {
       if (word.includes(g)) return "yellow";
       return "gray";
     });
+
+    // Update keyStatus based on feedback
+    const newKeyStatus = { ...keyStatus };
+    guess.split("").forEach((g, i) => {
+      const currentStatus = newKeyStatus[g];
+      if (feedback[i] === "green") {
+        newKeyStatus[g] = "green";
+      } else if (feedback[i] === "yellow" && currentStatus !== "green") {
+        newKeyStatus[g] = "yellow";
+      } else if (!currentStatus) {
+        newKeyStatus[g] = "gray";
+      }
+    });
+    setKeyStatus(newKeyStatus);
+
     setGuesses(
       guesses.map((g, i) =>
         i === guessCount ? { guess: guess.split(""), feedback } : g
@@ -158,7 +174,7 @@ function Wordle() {
             </div>
           ))}
         </div>
-        <button type="submit" hidden="true">
+        <button type="submit" hidden>
           Guess
         </button>
       </form>
@@ -184,7 +200,9 @@ function Wordle() {
               <button
                 key={key}
                 onClick={() => handleKeyPress(key)}
-                className="keyboard-key"
+                className={`keyboard-key keyboard-key-${
+                  keyStatus[key] || "default"
+                }`}
               >
                 {key}
               </button>
