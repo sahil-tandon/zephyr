@@ -125,7 +125,9 @@ function Wordle() {
                     const newGuesses = [...guesses];
                     newGuesses[index].guess[j] = e.target.value.toUpperCase();
                     setGuesses(newGuesses);
-                    if (j < 4) {
+                    if (newGuesses[index].guess[j] === "") {
+                      inputRefs[index][j].current.focus();
+                    } else if (j < 4) {
                       inputRefs[index][j + 1].current.focus();
                     }
                   }}
@@ -136,6 +138,9 @@ function Wordle() {
                       j > 0
                     ) {
                       inputRefs[index][j - 1].current.focus();
+                      const newGuesses = [...guesses];
+                      newGuesses[index].guess[j - 1] = "";
+                      setGuesses(newGuesses);
                     }
                   }}
                 />
