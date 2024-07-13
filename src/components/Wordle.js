@@ -158,7 +158,7 @@ function Wordle() {
             </div>
           ))}
         </div>
-        <button type="submit" hidden="true">
+        <button type="submit" hidden>
           Guess
         </button>
       </form>
