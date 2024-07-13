@@ -93,13 +93,33 @@ function Wordle() {
     if (guess.length < 5) {
       return;
     }
+
+    const wordLetterCount = {};
+    word.split("").forEach((letter) => {
+      wordLetterCount[letter] = (wordLetterCount[letter] || 0) + 1;
+    });
+
     const feedback = guess.split("").map((g, i) => {
-      if (g === word[i]) return "green";
-      if (word.includes(g)) return "yellow";
+      if (g === word[i]) {
+        wordLetterCount[g]--;
+        return "green";
+      }
       return "gray";
     });
 
-    // Update keyStatus based on feedback
+    guess.split("").forEach((g, i) => {
+      if (
+        feedback[i] === "gray" &&
+        word.includes(g) &&
+        wordLetterCount[g] > 0
+      ) {
+        feedback[i] = "yellow";
+        wordLetterCount[g]--;
+      } else if (feedback[i] === "gray") {
+        feedback[i] = "gray";
+      }
+    });
+
     const newKeyStatus = { ...keyStatus };
     guess.split("").forEach((g, i) => {
       const currentStatus = newKeyStatus[g];
