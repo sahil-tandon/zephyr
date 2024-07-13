@@ -44,30 +44,40 @@ function Wordle() {
 
   const handleKeyPress = (key) => {
     if (gameOver) return;
+
+    const newGuesses = [...guesses];
+    const currentGuess = newGuesses[guessCount].guess;
+
     if (key === "Backspace") {
-      const newGuesses = [...guesses];
-      const currentGuess = newGuesses[guessCount].guess;
-      const indexToClear =
-        currentGuess.lastIndexOf(
-          currentGuess.find((char) => char !== "") || ""
-        ) || 0;
-      newGuesses[guessCount].guess[indexToClear] = "";
-      setGuesses(newGuesses);
-      if (indexToClear > 0) {
-        inputRefs[guessCount][indexToClear - 1].current.focus();
+      let indexToClear = -1;
+      for (let i = currentGuess.length - 1; i >= 0; i--) {
+        if (currentGuess[i] !== "") {
+          indexToClear = i;
+          break;
+        }
+      }
+
+      if (indexToClear !== -1) {
+        newGuesses[guessCount].guess[indexToClear] = "";
+        setGuesses(newGuesses);
+        inputRefs[guessCount][indexToClear].current.focus();
+      } else {
+        inputRefs[guessCount][0].current.focus();
       }
     } else if (key === "Enter") {
       handleSubmit(new Event("submit"));
     } else {
-      const newGuesses = [...guesses];
-      const currentGuess = newGuesses[guessCount].guess;
       const firstEmptyIndex = currentGuess.indexOf("");
       if (firstEmptyIndex !== -1) {
         newGuesses[guessCount].guess[firstEmptyIndex] = key;
         setGuesses(newGuesses);
-        if (firstEmptyIndex < 4) {
+        if (firstEmptyIndex < currentGuess.length - 1) {
           inputRefs[guessCount][firstEmptyIndex + 1].current.focus();
+        } else {
+          inputRefs[guessCount][firstEmptyIndex].current.focus();
         }
+      } else {
+        inputRefs[guessCount][currentGuess.length - 1].current.focus();
       }
     }
   };
