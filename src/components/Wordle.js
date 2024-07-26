@@ -1,17 +1,6 @@
 import React, { useState, useEffect, createRef } from "react";
+import { GAME_WORDS, LEGAL_WORDS } from "../constants/words";
 import "./Wordle.css";
-
-const words = [
-  "music",
-  "sound",
-  "light",
-  "earth",
-  "magic",
-  "windy",
-  "charm",
-  "spark",
-  "peace",
-].map((word) => word.toUpperCase());
 
 const keyboardRows = [
   ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -34,7 +23,7 @@ function Wordle() {
   const inputRefs = guesses.map((row) => row.guess.map(() => createRef()));
 
   useEffect(() => {
-    setWord(words[Math.floor(Math.random() * words.length)]);
+    setWord(GAME_WORDS[Math.floor(Math.random() * GAME_WORDS.length)]);
   }, []);
 
   useEffect(() => {
@@ -91,6 +80,11 @@ function Wordle() {
 
     const guess = guesses[guessCount].guess.join("");
     if (guess.length < 5) {
+      alert("Incomplete guess. Please fill all 5 letters.");
+      return;
+    }
+    if (!LEGAL_WORDS.includes(guess)) {
+      alert("Not a valid word. Try again.");
       return;
     }
 
