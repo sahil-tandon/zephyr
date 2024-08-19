@@ -1,60 +1,108 @@
-import React, { useState, useEffect } from "react";
-import styled, { keyframes } from "styled-components";
+import React from "react";
+import styled, { keyframes, createGlobalStyle } from "styled-components";
 import treesImage from "../assets/bg-trees.png";
 
+const GlobalStyle = createGlobalStyle`
+  :root {
+    --twinkle-duration: 4s;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+`;
+
 const twinkle = keyframes`
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
+  25% {
+    opacity: 0;
+  }
 `;
 
-const shoot = keyframes`
-  0% { transform: translateX(0) translateY(0); opacity: 1; }
-  70% { opacity: 1; }
-  100% { transform: translateX(300px) translateY(300px); opacity: 0; }
+const comet = keyframes`
+  0%, 40% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  60%, 100% {
+    transform: translateX(-100vmax);
+    opacity: 0;
+  }
 `;
 
-const Sky = styled.div`
+const BackgroundWrapper = styled.div`
   position: fixed;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+`;
+
+const StarsWrapper = styled.div`
+  position: absolute;
   width: 100%;
   height: 100%;
   background: linear-gradient(#16161d, #1f1f3a, #3b2f4a);
   overflow: hidden;
 `;
 
-const Star = styled.div`
+const Stars = styled.svg`
   position: absolute;
-  background: #fff;
-  border-radius: 50%;
-  animation: ${twinkle} ${(props) => props.duration}s infinite;
-  ${(props) => `
-    width: ${props.size}px;
-    height: ${props.size}px;
-    top: ${props.top}%;
-    left: ${props.left}%;
-  `}
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: ${twinkle} var(--twinkle-duration) ease-in-out infinite;
+
+  &:nth-child(2) {
+    animation-delay: calc(var(--twinkle-duration) * -0.33);
+  }
+  &:nth-child(3) {
+    animation-delay: calc(var(--twinkle-duration) * -0.66);
+  }
 `;
 
-const ShootingStar = styled.div`
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: #fff;
-  animation: ${shoot} 3s linear forwards;
-  ${(props) => `
-    top: ${props.top}%;
-    left: ${props.left}%;
-  `}
+const Star = styled.circle`
+  fill: white;
+
+  &:nth-child(3n) {
+    opacity: 0.8;
+  }
+  &:nth-child(7n) {
+    opacity: 0.6;
+  }
+  &:nth-child(13n) {
+    opacity: 0.4;
+  }
+  &:nth-child(19n) {
+    opacity: 0.2;
+  }
+`;
+
+const Comet = styled.ellipse`
+  transform-origin: center center;
+  animation: ${comet} 10s linear infinite;
+
+  &.comet-b {
+    animation-delay: -3.3s;
+  }
+
+  &.comet-c {
+    animation-delay: -5s;
+  }
 `;
 
 const TreeLine = styled.div`
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 30%;
+  height: 20%;
   background-image: url(${treesImage});
   background-repeat: repeat-x;
   background-position: bottom;
@@ -62,52 +110,67 @@ const TreeLine = styled.div`
 `;
 
 const StarryBackground = () => {
-  const [stars] = useState(() =>
-    Array.from({ length: 200 }, () => ({
-      size: Math.random() * 3 + 1,
-      top: Math.random() * 75,
-      left: Math.random() * 100,
-      duration: (Math.random() * 3 + 2).toFixed(2),
-    }))
-  );
-
-  const [shootingStars, setShootingStars] = useState([]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShootingStars((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          top: Math.random() * 75,
-          left: Math.random() * 100,
-        },
-      ]);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (shootingStars.length > 0) {
-      const timeout = setTimeout(() => {
-        setShootingStars((prev) => prev.slice(1));
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [shootingStars]);
+  const generateStars = (count) => {
+    return Array.from({ length: count }, (_, i) => ({
+      cx: `${Math.round(Math.random() * 10000) / 100}%`,
+      cy: `${Math.round(Math.random() * 10000) / 100}%`,
+      r: Math.round((Math.random() + 0.5) * 10) / 10,
+    }));
+  };
 
   return (
     <>
-      <Sky>
-        {stars.map((star, index) => (
-          <Star key={index} {...star} />
-        ))}
-        {shootingStars.map((star) => (
-          <ShootingStar key={star.id} top={star.top} left={star.left} />
-        ))}
-      </Sky>
-      <TreeLine />
+      <GlobalStyle />
+      <BackgroundWrapper>
+        <StarsWrapper>
+          {[0, 1, 2].map((_, index) => (
+            <Stars key={index} preserveAspectRatio="none">
+              {generateStars(200).map((star, i) => (
+                <Star key={i} {...star} />
+              ))}
+            </Stars>
+          ))}
+          <svg width="100%" height="100%" preserveAspectRatio="none">
+            <defs>
+              <radialGradient id="comet-gradient" cx="0" cy=".5" r="0.5">
+                <stop offset="0%" stopColor="rgba(255,255,255,.8)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+              </radialGradient>
+            </defs>
+            <g transform="rotate(-135)">
+              <Comet
+                className="comet-a"
+                fill="url(#comet-gradient)"
+                cx="0"
+                cy="0"
+                rx="150"
+                ry="2"
+              />
+            </g>
+            <g transform="rotate(20)">
+              <Comet
+                className="comet-b"
+                fill="url(#comet-gradient)"
+                cx="100%"
+                cy="0"
+                rx="150"
+                ry="2"
+              />
+            </g>
+            <g transform="rotate(300)">
+              <Comet
+                className="comet-c"
+                fill="url(#comet-gradient)"
+                cx="40%"
+                cy="100%"
+                rx="150"
+                ry="2"
+              />
+            </g>
+          </svg>
+        </StarsWrapper>
+        <TreeLine />
+      </BackgroundWrapper>
     </>
   );
 };
